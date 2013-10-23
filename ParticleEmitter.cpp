@@ -13,7 +13,7 @@ ParticleEmitter::ParticleEmitter(uint16_t n) {
     numPixels = n;
     numParticles = MAX_PARTICLES;
     maxVelocity = (random(100) / 100.0 * 0.028) + 0.004; //float(numParticles / 5000.0);
-    stripPosition = (random(70) + 15) / 100.0;  // 0.0 - 1.0
+    stripPosition = 0.5;
     
     for (int i=0; i < MAX_PARTICLES; i++) {
         particles[i] = newParticle();
@@ -27,7 +27,7 @@ particle ParticleEmitter::newParticle() {
 
 //    uint8_t maxColor = (random(2) == 0 ? MAX_COLOR/(random(35)+5) : 0);
     uint8_t maxColor = MAX_COLOR * (1.0 - (random(50) / 100));
-    maxColor = random(MAX_PARTICLES*0.15) == 0 ? maxColor : 0.0;
+    maxColor = (random(10) > 4) ? maxColor : 0.0;
 
     p.velocity = ((random(89) + 10) / 100.0) * direction;
     
