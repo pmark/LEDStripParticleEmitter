@@ -16,6 +16,7 @@ struct particle {
     unsigned long int startTime;
     float startStripPosition;
     float currentStripPosition;
+    bool respawnOnOtherSide;
 };
 
 class ParticleEmitter {
@@ -35,6 +36,8 @@ class ParticleEmitter {
   uint16_t
     numPixels,    // Number of RGB LEDs in strip
     numParticles;
+  bool
+    respawnOnOtherSide;
 
  private:
 
