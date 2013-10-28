@@ -4,7 +4,7 @@ Copyright (C) Stumpware
 MIT license
 */
 
-#include "ParticleEmitter.h"
+#include "LEDStripParticleEmitter.h"
 #define MAX_COLOR 255
 
 /*****************************************************************************/
