@@ -5,7 +5,7 @@
  #include <pins_arduino.h>
 #endif
 
-#define MAX_PARTICLES 30
+#define MAX_PARTICLES 60
 
 struct particle {
     float velocity;

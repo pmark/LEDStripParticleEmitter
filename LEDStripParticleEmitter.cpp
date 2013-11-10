@@ -24,13 +24,14 @@ particle ParticleEmitter::newParticle() {
     particle p;
     
     int8_t direction = (random(2) == 0 ? 1 : -1);
-    uint8_t maxColor = MAX_COLOR * (1.0 - (random(50) / 100));
-    maxColor = (random(10) > 4) ? maxColor : 0.0;
+    uint8_t maxColor = MAX_COLOR * (1.0 - (random(80) / 100));
+    // maxColor = (random(10) > 4) ? maxColor : 0.0;
+    // uint8_t maxColor = 0;
 
     p.velocity = ((random(89) + 10) / 100.0) * direction;    
     p.redColor = random(maxColor);
-    p.greenColor = random(maxColor*0.25);
-    p.blueColor = random(maxColor*0.75);    
+    p.greenColor = random(maxColor);
+    p.blueColor = random(maxColor);    
     p.startTime = millis();
     p.startStripPosition = stripPosition;
     p.currentStripPosition = p.startStripPosition;
