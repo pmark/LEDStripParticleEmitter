@@ -42,12 +42,14 @@ class ParticleEmitter {
   uint8_t
     maxColor;
   bool
-    respawnOnOtherSide;
+    respawnOnOtherSide,
+    threed;
 
  private:
 
   Particle
     particles[MAX_PARTICLES];
   float
-    masterVelocityDeltaDirection;
+    masterVelocityDeltaDirection,
+    zDeltaDirection;
 };
