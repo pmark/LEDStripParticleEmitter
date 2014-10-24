@@ -94,7 +94,7 @@ void loop() {
 
           // Change the particle velocities
           // There's a small chance of high speed
-//          emitter.maxVelocity = (random(100) / 100.0 * 0.006) * (random(6) == 0 ? 2 : 1) + 0.004;
+          // emitter.maxVelocity = (random(100) / 100.0 * 0.006) * (random(6) == 0 ? 2 : 1) + 0.004;
           emitter.maxVelocity = (random(30) / 100.0 * MAX_VELOCITY + MAX_VELOCITY*0.7);
           float scale = random(6);
           if (scale == 0) {
@@ -141,10 +141,6 @@ void loop() {
         }
 
         // Draw particle
-//        strip.setPixelColor(currentSlot, 
-//                            strip.Color(prt.redColor*colorScale, 
-//                                        prt.blueColor*colorScale, 
-//                                        prt.greenColor*colorScale));
 
         if (emitter.threed) {
           byte colorMode = 3;
@@ -182,15 +178,7 @@ void loop() {
       }
 
       // Terminate the tail
-//      strip.setPixelColor(oldSlot, strip.Color(1,0,1));
     }
-
-    // Draw the spawn point
-//    uint8_t spawnColor = (MAX_COLOR / 200 * random(100) / 100);
-//    strip.setPixelColor(emitter.stripPosition*NUM_PIXELS, 
-//                        strip.Color(random(2) == 0 ? 0 : random(MAX_COLOR),
-//                                    random(2) == 0 ? 0 : random(MAX_COLOR), 
-//                                    random(2) == 0 ? 0 : random(MAX_COLOR)));
 
     uint16_t frameElapsedMillis = millis() - frameStartMillis;
     uint16_t frameDelayMillis = 0;
