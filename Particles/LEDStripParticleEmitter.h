@@ -4,6 +4,9 @@ Copyright (C) P. Mark Anderson
 MIT license
 */
 
+#ifndef LEDStripParticleEmitter_h
+#define LEDStripParticleEmitter_h
+
 #if (ARDUINO >= 100)
  #include <Arduino.h>
 #else
@@ -64,3 +67,6 @@ class LEDStripParticleEmitter {
   float
     zDeltaDirection;
 };
+
+
+#endif
