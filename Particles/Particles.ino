@@ -8,7 +8,7 @@
 #define LED_STRIP_PIN 11
 #define MAX_COLOR 255   // max 255
 #define MIN_COLOR 3
-#define MAX_VELOCITY 0.015
+#define MAX_VELOCITY 0.015  // TODO: Set this indirectly by specifying max seconds to transit entire strip.
 #define MILLIS_PER_FRAME (1000 / FPS)
 
 // Parameter 1 = number of pixels in strip
@@ -19,7 +19,7 @@
 //   NEO_KHZ400  400 KHz bitstream (e.g. FLORA pixels)
 //   NEO_KHZ800  800 KHz bitstream (e.g. High Density LED strip)
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIXEL_COUNT, LED_STRIP_PIN, NEO_RGB + NEO_KHZ800);
-ParticleEmitter emitter = ParticleEmitter(PIXEL_COUNT, MAX_COLOR);
+LEDStripParticleEmitter emitter = LEDStripParticleEmitter(PIXEL_COUNT, MAX_COLOR);
 
 unsigned long frameStartMillis = 0;
 uint8_t randomRedColor = 0;
@@ -36,8 +36,6 @@ void setup() {
   emitter.threed = true;
   emitter.numParticles = PARTICLE_COUNT;
   emitter.maxVelocity = MAX_VELOCITY;
-  
-  emitterTransitStartMillis = millis();
 }
 
 void loop() {  
