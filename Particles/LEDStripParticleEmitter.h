@@ -14,6 +14,7 @@ MIT license
  #include <pins_arduino.h>
 #endif
 
+#include <Adafruit_NeoPixel.h>
 #include <stdint.h>
 #include <stddef.h>
 #include <stdlib.h>
@@ -44,6 +45,8 @@ class LEDStripParticleEmitter {
   LEDStripParticleEmitter(void);
   void
     begin(void);
+  void
+    updateStrip(Adafruit_NeoPixel& strip);
   Particle
     updateParticle(uint16_t i),
     newParticle();
