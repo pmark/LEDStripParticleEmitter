@@ -1,10 +1,12 @@
 #include <Adafruit_NeoPixel.h>
 #include "LEDStripParticleEmitter.h"
 
-#define PIXEL_COUNT 60
+#define PIXEL_COUNT 32
 
 #define LED_STRIP_PIN 11
 #define MAX_COLOR 255   // max 255
+#define PIXELS_PER_METER 30
+#define MIN_TRANSIT_TIME_SEC 10.0
 
 // Parameter 1 = number of pixels in strip
 // Parameter 2 = pin number (most are valid)
@@ -15,7 +17,7 @@
 //   NEO_KHZ800  800 KHz bitstream (e.g. High Density LED strip)
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIXEL_COUNT, LED_STRIP_PIN, NEO_RGB + NEO_KHZ800);
-LEDStripParticleEmitter emitter = LEDStripParticleEmitter(PIXEL_COUNT, MAX_COLOR);
+LEDStripParticleEmitter emitter = LEDStripParticleEmitter(PIXEL_COUNT, PIXELS_PER_METER, MIN_TRANSIT_TIME_SEC, MAX_COLOR);
 
 void setup() {
   Serial.begin(9600);
@@ -23,8 +25,8 @@ void setup() {
   strip.begin();
   strip.show();
   
+  emitter.numParticles = 1;
 //  emitter.threed = true;
-//  emitter.numParticles = 12;
 //  emitter.respawnOnOtherSide = false;
 //  emitter.flicker = false;
 

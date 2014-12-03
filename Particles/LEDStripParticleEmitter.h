@@ -38,11 +38,8 @@ typedef struct {
 } Particle;
 
 class LEDStripParticleEmitter {
-
  public:
-
-  LEDStripParticleEmitter(uint16_t numPixels, uint8_t maxColor);
-  LEDStripParticleEmitter(void);
+  LEDStripParticleEmitter(uint16_t numPixels, uint8_t ppm, float minTransitTimeSec, uint8_t maxColor);
   void
     begin(void);
   void
@@ -52,11 +49,13 @@ class LEDStripParticleEmitter {
     newParticle();
   float
     stripPosition,
+    minTransitTimeSec,
     maxVelocity;    
   uint16_t
     numPixels,    // Number of RGB LEDs in strip
     numParticles;
   uint8_t
+    ppm,
     maxColor;
   bool
     respawnOnOtherSide,
@@ -64,7 +63,6 @@ class LEDStripParticleEmitter {
     threed;
 
  private:
-
   Particle
     particles[MAX_PARTICLES];
   float
