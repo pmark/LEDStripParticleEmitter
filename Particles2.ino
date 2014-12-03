@@ -1,10 +1,10 @@
 #include <Adafruit_NeoPixel.h>
 #include "LEDStripParticleEmitter.h"
 
-#define NUM_PIXELS 90
+#define NUM_PIXELS 60
 #define NUM_PARTICLES 12
 
-#define FPS 210
+#define FPS 30
 #define PIN 11
 #define MAX_COLOR 255   // max 255
 #define MIN_COLOR 3

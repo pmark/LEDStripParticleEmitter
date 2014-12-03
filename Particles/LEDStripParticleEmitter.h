@@ -1,3 +1,9 @@
+/*
+Library to simulate particle emission with an RGB LED strip.
+Copyright (C) P. Mark Anderson
+MIT license
+*/
+
 #if (ARDUINO >= 100)
  #include <Arduino.h>
 #else
@@ -5,7 +11,12 @@
  #include <pins_arduino.h>
 #endif
 
-#define MAX_PARTICLES 40 // Watch out for
+#include <stdint.h>
+#include <stddef.h>
+#include <stdlib.h>
+
+#define MAX_PARTICLES 33
+#define GOLDEN_RATIO 1.618
 
 typedef struct {
   float x;
@@ -15,23 +26,23 @@ typedef struct {
 
 typedef struct {
     Coord3D velocity;
-    byte redColor;
-    byte greenColor;
-    byte blueColor;
-    boolean dimmed;
+    uint8_t redColor;
+    uint8_t greenColor;
+    uint8_t blueColor;
+    bool dimmed;
     Coord3D coord;
 } Particle;
 
-class ParticleEmitter {
+class LEDStripParticleEmitter {
 
  public:
 
-  ParticleEmitter(uint16_t numPixels, uint8_t maxColor);
-  ParticleEmitter(void);
+  LEDStripParticleEmitter(uint16_t numPixels, uint8_t maxColor);
+  LEDStripParticleEmitter(void);
   void
     begin(void);
   Particle
-    updateParticle(uint16_t i, boolean respawn),
+    updateParticle(uint16_t i),
     newParticle();
   float
     stripPosition,
@@ -43,6 +54,7 @@ class ParticleEmitter {
     maxColor;
   bool
     respawnOnOtherSide,
+    flicker,
     threed;
 
  private:
@@ -50,6 +62,5 @@ class ParticleEmitter {
   Particle
     particles[MAX_PARTICLES];
   float
-    masterVelocityDeltaDirection,
     zDeltaDirection;
 };
