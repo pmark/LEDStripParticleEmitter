@@ -29,19 +29,18 @@ typedef struct {
 } Coord3D;
 
 typedef struct {
-    Coord3D velocity;
+    Coord3D speed;
     uint8_t redColor;
     uint8_t greenColor;
     uint8_t blueColor;
     bool dimmed;
     Coord3D coord;
+    unsigned long lastUpdatedAt;
 } Particle;
 
 class LEDStripParticleEmitter {
  public:
-  LEDStripParticleEmitter(uint16_t numPixels, uint8_t ppm, float minTransitTimeSec, uint8_t maxColor);
-  void
-    begin(void);
+  LEDStripParticleEmitter(uint16_t pixelCount, uint8_t ppm, uint8_t particleCount);
   void
     updateStrip(Adafruit_NeoPixel& strip);
   Particle
@@ -49,16 +48,15 @@ class LEDStripParticleEmitter {
     newParticle();
   float
     stripPosition,
-    minTransitTimeSec,
-    maxVelocity;    
+    particleSpeedMetersPerSec,
+    particleSpeedRange;
   uint16_t
-    numPixels,    // Number of RGB LEDs in strip
+    pixelCount,    // Number of RGB LEDs in strip
     numParticles;
   uint8_t
     ppm,
     maxColor;
   bool
-    respawnOnOtherSide,
     flicker,
     threed;
 
@@ -67,6 +65,10 @@ class LEDStripParticleEmitter {
     particles[MAX_PARTICLES];
   float
     zDeltaDirection;
+  unsigned long
+    particlesLastUpdatedAt,
+    frameLastUpdatedAt;
+    
 };
 
 

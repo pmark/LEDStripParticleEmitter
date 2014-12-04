@@ -13,30 +13,31 @@ MIT license
 #define FPS 30.0
 #define MILLIS_PER_FRAME (1000 / FPS)
 
-LEDStripParticleEmitter::LEDStripParticleEmitter(uint16_t _numPixels, uint8_t _ppm, float _minTransitTimeSec, uint8_t _maxColor) {
-    maxColor = fmin(MAX_COLOR, fmax(0, _maxColor));
-    numPixels = _numPixels;
+template <typename T,unsigned S>
+inline unsigned arraysize(const T (&v)[S]) { return S; }
+
+LEDStripParticleEmitter::LEDStripParticleEmitter(uint16_t _pixelCount, uint8_t _ppm, uint8_t _particleCount) {
+    pixelCount = _pixelCount;
     ppm = _ppm;
-    minTransitTimeSec = _minTransitTimeSec;
-    numParticles = 12;
-    
+    particleSpeedMetersPerSec = 0.5;
+    particleSpeedRange = 0.0;
     stripPosition = 0.5;
     zDeltaDirection = 1.0;
     threed = false;
     flicker = false;
-    respawnOnOtherSide = false;
+    frameLastUpdatedAt = 0;
+    particlesLastUpdatedAt = 0;
+    maxColor = MAX_COLOR;
+    
+    numParticles = _particleCount;
+    if (numParticles > MAX_PARTICLES) {
+      numParticles = MAX_PARTICLES;
+    }
 
-    _minTransitTimeSec = fmax(0.1, _minTransitTimeSec);
-    uint8_t stripLengthMeters = (_numPixels / _ppm);
-    float metersPerSec = (stripLengthMeters  / _minTransitTimeSec);
-    
-    maxVelocity = (metersPerSec / FPS);
-    maxVelocity = fmax(0.01, maxVelocity);
-    maxVelocity = fmin(0.02, maxVelocity);
-    
     for (int i=0; i < numParticles; i++) {
         particles[i] = newParticle();
     }
+
 }
 
 Particle LEDStripParticleEmitter::newParticle() {
@@ -47,13 +48,26 @@ Particle LEDStripParticleEmitter::newParticle() {
     p.coord.z = (threed ? random(100) / 100.0 : 0.0);
 
     int8_t direction = (p.coord.x > 0.5 ? -1 : 1);
-    p.velocity.x = 1.0; //((random(77) + 33) / 100.0) * direction;
-    p.velocity.y = 0.0;
+
+
+    // compute particle speed
+    particleSpeedMetersPerSec = fmax(0.001, particleSpeedMetersPerSec);
+    ppm = (ppm > 0 ? ppm : 1);
+    float stripLengthMeters = float(pixelCount) / float(ppm);
+    stripLengthMeters = (stripLengthMeters > 0.0 ? stripLengthMeters : 1.0);
+
+    float velocityUnitsPerSec = (particleSpeedMetersPerSec / float(stripLengthMeters));
+    velocityUnitsPerSec = (velocityUnitsPerSec - (particleSpeedRange / 2.0)) + (random(100.0) / 100.0 * particleSpeedRange);
+    velocityUnitsPerSec = fmax(0.0001, velocityUnitsPerSec);
+
+    p.speed.x = (velocityUnitsPerSec * direction) / 1000.0;
+    p.speed.y = 0.0;
 
     direction = (random(2) == 0 ? 1 : -1);
-    p.velocity.z = (M_PI/45); //(M_PI / 180.0 * random(90) * direction);
+    p.speed.z = 0.0; //(M_PI/45); //(M_PI / 180.0 * random(90) * direction);
 
-    uint8_t prtMaxColor = maxColor * (1.0 - (random(50) / 100.0));
+    maxColor = fmin(MAX_COLOR, fmax(0, maxColor));
+    uint8_t prtMaxColor = maxColor * (1.0 - (random(66) / 100.0));
 
     p.redColor = random(prtMaxColor);
     p.greenColor = random(prtMaxColor);
@@ -63,80 +77,61 @@ Particle LEDStripParticleEmitter::newParticle() {
     return p;
 }
 
-void LEDStripParticleEmitter::begin(void) {
-}
-
 Particle LEDStripParticleEmitter::updateParticle(uint16_t i) {
-  
     Particle *p = &particles[i];
     
     if (flicker) {
         p->dimmed = (random(3) == 0 ? 1 : 0);
     }
 
+    // Z speed acts as theta
+    p->coord.z = (threed ? 0.9*sin(p->speed.z) : 0.0);
+    p->speed.z += (M_PI/500.0);
+
+    if (p->speed.z >= M_PI) {
+        p->speed.z = 0.0;
+    }
+
     float zScale = (1.0 - (p->coord.z * 0.9));
-    p->coord.x += (maxVelocity * p->velocity.x) * zScale;
-    p->coord.y += (maxVelocity * p->velocity.y) * zScale;
+    unsigned long now = millis();
+    unsigned long millisSinceLastUpdate = (now - particlesLastUpdatedAt);
+    p->coord.x += (float(millisSinceLastUpdate) * p->speed.x) * zScale;
+    p->coord.y += (millisSinceLastUpdate * p->speed.y) * zScale;
 
-    // Z velocity acts as theta
-    p->coord.z =1.0; // min(0.9, sin(p->velocity.z));
-    p->velocity.z += M_PI/200.0 * zDeltaDirection;
-
-    if (p->velocity.z >= M_PI/2 || p->velocity.z <= M_PI/90) {
-        zDeltaDirection *= -1.0;
-    }
-
-    float maxHighVelocity = maxVelocity * GOLDEN_RATIO * 10.0; 
-    float extra = 0.0; //0.5;
+    float extra = 0.25;
     
-    if (respawnOnOtherSide && p->velocity.x < maxHighVelocity && p->velocity.y < maxHighVelocity) {        
-        if (p->coord.x < 0.0-extra) {
-            p->coord.x = 1.0;
-            p->velocity.x *= GOLDEN_RATIO;
-        }
-        else if (p->coord.x > 1.0+extra) {
-            p->coord.x = 0.0;            
-            p->velocity.x *= GOLDEN_RATIO;
-        }
-
-        if (p->coord.y < 0.0-extra) {
-            p->coord.y = 1.0;            
-            p->velocity.y *= GOLDEN_RATIO;
-        }
-        else if (p->coord.y > 1.0+extra) {
-            p->coord.y = 0.0;            
-            p->velocity.y *= GOLDEN_RATIO;
-        }
-    }
-    else {
-        if (p->coord.x < 0.0-extra || p->coord.x > 1.0+extra ||
-            p->coord.y < 0.0-extra || p->coord.y > 1.0+extra) {
-            *p = newParticle();            
-        }
+    if (p->coord.x < 0.0-extra || p->coord.x > 1.0+extra ||
+        p->coord.y < 0.0-extra || p->coord.y > 1.0+extra) {
+//        delete p;
+        *p = newParticle();            
     }
 
     return *p;
 }
 
-
 void LEDStripParticleEmitter::updateStrip(Adafruit_NeoPixel& strip) {
-    unsigned long frameStartMillis = millis();
+    if (frameLastUpdatedAt == 0) {
+        frameLastUpdatedAt = millis();
+    }
+
+    if (particlesLastUpdatedAt == 0) {
+        particlesLastUpdatedAt = millis();
+    }
 
     // Draw each particle
     for (int i=0; i < numParticles; i++) {
 
         // Update this particle's position
         Particle prt = updateParticle(i);
-  Serial.println(prt.coord.x);
-
+        
         float zScale = (1.0 - prt.coord.z);
-        float tailLength = 2; // 1 + abs(prt.velocity.x * 15) * zScale;
-        int16_t startSlot = numPixels * prt.coord.x;
+        float tailLength = 1 + abs(prt.speed.x * 5000) * zScale;
+        int16_t startSlot = pixelCount * prt.coord.x;
         int16_t currentSlot = startSlot;
         int16_t oldSlot = currentSlot;
 
         // Draw the particle and its tail
-        // High velocity particles have longer tails
+        // High speed particles have longer tails
         for (int ii=0; ii < tailLength; ii++) {
 
             // Taper the tail fade
@@ -162,19 +157,19 @@ void LEDStripParticleEmitter::updateStrip(Adafruit_NeoPixel& strip) {
                                             prt.blueColor * colorScale));
 
             oldSlot = currentSlot;
-            currentSlot = startSlot + ((ii+1) * (prt.velocity.x > 0 ? -1 : 1));
+            currentSlot = startSlot + ((ii+1) * (prt.speed.x > 0 ? -1 : 1));
         }
 
         //Terminate the tail
         strip.setPixelColor(oldSlot, strip.Color(0, 0, 0));
     }
 
-    uint16_t frameElapsedMillis = millis() - frameStartMillis;
-    uint16_t frameDelayMillis = (MILLIS_PER_FRAME - frameElapsedMillis);
-
-    if (frameDelayMillis > 0.0) {
-        delay(frameDelayMillis);
+    particlesLastUpdatedAt = millis();
+    delay(1);
+    
+    if ((millis() - frameLastUpdatedAt) >= MILLIS_PER_FRAME) {
         strip.show();
+        frameLastUpdatedAt = millis();        
     }
 }
 

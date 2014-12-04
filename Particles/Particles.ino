@@ -1,12 +1,10 @@
 #include <Adafruit_NeoPixel.h>
 #include "LEDStripParticleEmitter.h"
 
-#define PIXEL_COUNT 32
-
 #define LED_STRIP_PIN 11
-#define MAX_COLOR 255   // max 255
+#define PIXEL_COUNT 32
 #define PIXELS_PER_METER 30
-#define MIN_TRANSIT_TIME_SEC 10.0
+#define PARTICLE_COUNT 3
 
 // Parameter 1 = number of pixels in strip
 // Parameter 2 = pin number (most are valid)
@@ -17,7 +15,7 @@
 //   NEO_KHZ800  800 KHz bitstream (e.g. High Density LED strip)
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIXEL_COUNT, LED_STRIP_PIN, NEO_RGB + NEO_KHZ800);
-LEDStripParticleEmitter emitter = LEDStripParticleEmitter(PIXEL_COUNT, PIXELS_PER_METER, MIN_TRANSIT_TIME_SEC, MAX_COLOR);
+LEDStripParticleEmitter emitter = LEDStripParticleEmitter(PIXEL_COUNT, PIXELS_PER_METER, PARTICLE_COUNT);
 
 void setup() {
   Serial.begin(9600);
@@ -25,13 +23,15 @@ void setup() {
   strip.begin();
   strip.show();
   
-  emitter.numParticles = 1;
-//  emitter.threed = true;
-//  emitter.respawnOnOtherSide = false;
-//  emitter.flicker = false;
+  emitter.particleSpeedMetersPerSec = 2.0;
 
-//  TODO: Make max particle velocity be time in seconds to transit entire strip
-//  emitter.maxVelocity = 0.015;   // UNO: 0.015 
+  // particleSpeedRange is the range of allowed random values for a particle’s speed.
+  // The default value is 0.0. If non-zero, the speed of each particle is randomly determined and may vary by plus or minus half of the range value.
+  emitter.particleSpeedRange = 0.66;
+  emitter.maxColor = 255;
+  emitter.threed = false;
+
+//  emitter.flicker = false;
 
 }
 
