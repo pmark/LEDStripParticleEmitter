@@ -47,12 +47,13 @@ class LEDStripParticleEmitter {
     updateParticle(uint16_t i),
     newParticle();
   float
+    metersToPixels(float meters),
     stripPosition,
     particleSpeedMetersPerSec,
     particleSpeedRange;
   uint16_t
     pixelCount,    // Number of RGB LEDs in strip
-    numParticles;
+    particleCount;
   uint8_t
     ppm,
     maxColor;

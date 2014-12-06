@@ -13,12 +13,9 @@ MIT license
 #define FPS 30.0
 #define MILLIS_PER_FRAME (1000 / FPS)
 
-template <typename T,unsigned S>
-inline unsigned arraysize(const T (&v)[S]) { return S; }
-
 LEDStripParticleEmitter::LEDStripParticleEmitter(uint16_t _pixelCount, uint8_t _ppm, uint8_t _particleCount) {
     pixelCount = _pixelCount;
-    ppm = _ppm;
+    ppm = (_ppm > 0 ? _ppm : 1);    
     particleSpeedMetersPerSec = 3.5;
     particleSpeedRange = 0.0;
     stripPosition = 0.5;
@@ -27,13 +24,13 @@ LEDStripParticleEmitter::LEDStripParticleEmitter(uint16_t _pixelCount, uint8_t _
     flicker = false;
     frameLastUpdatedAt = 0;
     maxColor = MAX_COLOR;
-    
-    numParticles = _particleCount;
-    if (numParticles > MAX_PARTICLES) {
-      numParticles = MAX_PARTICLES;
+    particleCount = _particleCount;
+
+    if (particleCount > MAX_PARTICLES) {
+      particleCount = MAX_PARTICLES;
     }
 
-    for (int i=0; i < numParticles; i++) {
+    for (int i=0; i < particleCount; i++) {
         particles[i] = newParticle();
     }
 
@@ -50,7 +47,6 @@ Particle LEDStripParticleEmitter::newParticle() {
 
     // compute particle speed
     particleSpeedMetersPerSec = fmax(0.001, particleSpeedMetersPerSec);
-    ppm = (ppm > 0 ? ppm : 1);
     float stripLengthMeters = float(pixelCount) / float(ppm);
     stripLengthMeters = (stripLengthMeters > 0.0 ? stripLengthMeters : 1.0);
 
@@ -111,6 +107,10 @@ Particle LEDStripParticleEmitter::updateParticle(uint16_t i) {
     return *p;
 }
 
+float LEDStripParticleEmitter::metersToPixels(float meters) {
+  return meters * ppm;
+}
+
 void LEDStripParticleEmitter::updateStrip(Adafruit_NeoPixel& strip) {  
     unsigned long now = millis();
 
@@ -123,13 +123,13 @@ void LEDStripParticleEmitter::updateStrip(Adafruit_NeoPixel& strip) {
     }
 
     // Draw each particle
-    for (int i=0; i < numParticles; i++) {
+    for (int i=0; i < particleCount; i++) {
 
         // Update this particle's position
         Particle prt = updateParticle(i);
         
         float zScale = (1.0 - prt.coord.z);
-        float tailLength = 1 + abs(prt.speed.x * 5000) * zScale;
+        float tailLength = 1 + abs(prt.speed.x * 25000) * zScale;
         int16_t startSlot = pixelCount * prt.coord.x;
         int16_t currentSlot = startSlot;
         int16_t oldSlot = currentSlot;

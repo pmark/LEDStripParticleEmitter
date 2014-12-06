@@ -4,7 +4,7 @@
 #define LED_STRIP_PIN 11
 #define PIXEL_COUNT 32
 #define PIXELS_PER_METER 30
-#define PARTICLE_COUNT 3
+#define PARTICLE_COUNT 8
 
 // Parameter 1 = number of pixels in strip
 // Parameter 2 = pin number (most are valid)
@@ -20,12 +20,10 @@ LEDStripParticleEmitter emitter = LEDStripParticleEmitter(PIXEL_COUNT, PIXELS_PE
 void setup() {
   Serial.begin(9600);
   strip.begin();
-  emitter.particleSpeedMetersPerSec = 1.5;
-
   // The speed of each particle varies by plus or minus half of the range value.
-  emitter.particleSpeedRange = 1;
-  emitter.maxColor = 50;
-//  emitter.threed = false;
+  emitter.particleSpeedMetersPerSec = emitter.particleSpeedRange = 0.66;
+  emitter.maxColor = 255;
+  emitter.threed = true;
 }
 
 void loop() {  
