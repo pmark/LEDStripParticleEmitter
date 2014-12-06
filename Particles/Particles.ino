@@ -19,20 +19,13 @@ LEDStripParticleEmitter emitter = LEDStripParticleEmitter(PIXEL_COUNT, PIXELS_PE
 
 void setup() {
   Serial.begin(9600);
-  
   strip.begin();
-  strip.show();
-  
-  emitter.particleSpeedMetersPerSec = 2.0;
+  emitter.particleSpeedMetersPerSec = 1.5;
 
-  // particleSpeedRange is the range of allowed random values for a particle’s speed.
-  // The default value is 0.0. If non-zero, the speed of each particle is randomly determined and may vary by plus or minus half of the range value.
-  emitter.particleSpeedRange = 0.66;
-  emitter.maxColor = 255;
-  emitter.threed = false;
-
-//  emitter.flicker = false;
-
+  // The speed of each particle varies by plus or minus half of the range value.
+  emitter.particleSpeedRange = 1;
+  emitter.maxColor = 50;
+//  emitter.threed = false;
 }
 
 void loop() {  

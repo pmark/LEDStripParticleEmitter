@@ -19,14 +19,13 @@ inline unsigned arraysize(const T (&v)[S]) { return S; }
 LEDStripParticleEmitter::LEDStripParticleEmitter(uint16_t _pixelCount, uint8_t _ppm, uint8_t _particleCount) {
     pixelCount = _pixelCount;
     ppm = _ppm;
-    particleSpeedMetersPerSec = 0.5;
+    particleSpeedMetersPerSec = 3.5;
     particleSpeedRange = 0.0;
     stripPosition = 0.5;
     zDeltaDirection = 1.0;
     threed = false;
     flicker = false;
     frameLastUpdatedAt = 0;
-    particlesLastUpdatedAt = 0;
     maxColor = MAX_COLOR;
     
     numParticles = _particleCount;
@@ -49,7 +48,6 @@ Particle LEDStripParticleEmitter::newParticle() {
 
     int8_t direction = (p.coord.x > 0.5 ? -1 : 1);
 
-
     // compute particle speed
     particleSpeedMetersPerSec = fmax(0.001, particleSpeedMetersPerSec);
     ppm = (ppm > 0 ? ppm : 1);
@@ -57,7 +55,11 @@ Particle LEDStripParticleEmitter::newParticle() {
     stripLengthMeters = (stripLengthMeters > 0.0 ? stripLengthMeters : 1.0);
 
     float velocityUnitsPerSec = (particleSpeedMetersPerSec / float(stripLengthMeters));
-    velocityUnitsPerSec = (velocityUnitsPerSec - (particleSpeedRange / 2.0)) + (random(100.0) / 100.0 * particleSpeedRange);
+
+    if (particleSpeedRange > 0.0) {
+      velocityUnitsPerSec = (velocityUnitsPerSec - (particleSpeedRange / 2.0)) + (random(100.0) / 100.0 * particleSpeedRange);
+    }
+
     velocityUnitsPerSec = fmax(0.0001, velocityUnitsPerSec);
 
     p.speed.x = (velocityUnitsPerSec * direction) / 1000.0;
@@ -94,7 +96,7 @@ Particle LEDStripParticleEmitter::updateParticle(uint16_t i) {
 
     float zScale = (1.0 - (p->coord.z * 0.9));
     unsigned long now = millis();
-    unsigned long millisSinceLastUpdate = (now - particlesLastUpdatedAt);
+    unsigned long millisSinceLastUpdate = (now - frameLastUpdatedAt);
     p->coord.x += (float(millisSinceLastUpdate) * p->speed.x) * zScale;
     p->coord.y += (millisSinceLastUpdate * p->speed.y) * zScale;
 
@@ -109,13 +111,15 @@ Particle LEDStripParticleEmitter::updateParticle(uint16_t i) {
     return *p;
 }
 
-void LEDStripParticleEmitter::updateStrip(Adafruit_NeoPixel& strip) {
+void LEDStripParticleEmitter::updateStrip(Adafruit_NeoPixel& strip) {  
+    unsigned long now = millis();
+
     if (frameLastUpdatedAt == 0) {
-        frameLastUpdatedAt = millis();
+        frameLastUpdatedAt = now;
     }
 
-    if (particlesLastUpdatedAt == 0) {
-        particlesLastUpdatedAt = millis();
+    if ((now - frameLastUpdatedAt) < MILLIS_PER_FRAME) {
+      return;
     }
 
     // Draw each particle
@@ -164,12 +168,7 @@ void LEDStripParticleEmitter::updateStrip(Adafruit_NeoPixel& strip) {
         strip.setPixelColor(oldSlot, strip.Color(0, 0, 0));
     }
 
-    particlesLastUpdatedAt = millis();
-    delay(1);
-    
-    if ((millis() - frameLastUpdatedAt) >= MILLIS_PER_FRAME) {
-        strip.show();
-        frameLastUpdatedAt = millis();        
-    }
+    strip.show();
+    frameLastUpdatedAt = millis();;    
 }
 
