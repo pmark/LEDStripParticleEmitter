@@ -59,7 +59,12 @@ class LEDStripParticleEmitter {
     maxColor;
   bool
     flicker,
+    useColorSequence,
     threed;
+  uint32_t
+    colorSequence[3];
+  uint8_t
+    currentColorSequenceIndex;
 
  private:
   Particle

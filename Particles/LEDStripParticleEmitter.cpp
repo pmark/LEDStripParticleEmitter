@@ -24,7 +24,9 @@ LEDStripParticleEmitter::LEDStripParticleEmitter(uint16_t _pixelCount, uint8_t _
     flicker = false;
     frameLastUpdatedAt = 0;
     maxColor = MAX_COLOR;
+    currentColorSequenceIndex = 0;
     particleCount = _particleCount;
+    useColorSequence = 0;
 
     if (particleCount > MAX_PARTICLES) {
       particleCount = MAX_PARTICLES;
@@ -67,9 +69,20 @@ Particle LEDStripParticleEmitter::newParticle() {
     maxColor = fmin(MAX_COLOR, fmax(0, maxColor));
     uint8_t prtMaxColor = maxColor * (1.0 - (random(66) / 100.0));
 
-    p.redColor = random(prtMaxColor);
-    p.greenColor = random(prtMaxColor);
-    p.blueColor = random(prtMaxColor);
+    if (useColorSequence) {
+      if (++currentColorSequenceIndex > 2) {
+        currentColorSequenceIndex = 0;
+      }
+      uint32_t c = colorSequence[currentColorSequenceIndex];
+      p.redColor = (uint8_t)(c >> 16);
+      p.greenColor = (uint8_t)(c >>  8);
+      p.blueColor = (uint8_t)c;
+    }
+    else {
+      p.redColor = random(prtMaxColor);
+      p.greenColor = random(prtMaxColor);
+      p.blueColor = random(prtMaxColor);
+    }
 
     p.dimmed = false;        
     return p;
@@ -129,7 +142,7 @@ void LEDStripParticleEmitter::updateStrip(Adafruit_NeoPixel& strip) {
         Particle prt = updateParticle(i);
         
         float zScale = (1.0 - prt.coord.z);
-        float tailLength = 1 + abs(prt.speed.x * 25000) * zScale;
+        float tailLength = 1 + abs(prt.speed.x * 10000) * zScale;
         int16_t startSlot = pixelCount * prt.coord.x;
         int16_t currentSlot = startSlot;
         int16_t oldSlot = currentSlot;
